@@ -72,6 +72,7 @@ function normalize(raw, i) {
         duration: e.duration || "",
         description: e.description || "",
         thumb: e.thumb || "",
+        subs: normSubs(e.subs),
       })),
     }));
     const first = item.seasons[0] && item.seasons[0].episodes[0];
@@ -80,7 +81,19 @@ function normalize(raw, i) {
   } else {
     item.src = raw.src || raw.url || "";
   }
+  item.subs = normSubs(raw.subs); // movie subs, or series-level fallback used when an episode has none
   return item;
+}
+
+/* Normalize a subtitle list: [{ label, lang, src, default }] */
+function normSubs(arr) {
+  if (!Array.isArray(arr)) return [];
+  return arr.map((s) => ({
+    label: s.label || s.language || s.lang || "Subtitles",
+    lang: s.lang || s.srclang || s.code || "",
+    src: s.src || s.url || "",
+    default: !!s.default,
+  })).filter((s) => s.src);
 }
 
 /* ---------- Featured pick ---------- */
@@ -224,8 +237,12 @@ function openModal(id) {
     item.year,
     item.type === "series" ? `${item.episodeCount} episodes` : item.duration,
   ].filter(Boolean);
+  const hasSubs = item.type === "movie"
+    ? item.subs.length > 0
+    : (item.subs.length > 0 || item.seasons.some((s) => s.episodes.some((e) => e.subs.length)));
   document.getElementById("modal-meta").innerHTML =
     (item.rating ? `<span class="pill">${esc(item.rating)}</span>` : "") +
+    (hasSubs ? `<span class="pill">CC</span>` : "") +
     meta.map((m) => `<span>${esc(m)}</span>`).join('<span class="dot"></span>');
 
   document.getElementById("modal-tags").innerHTML =
@@ -236,9 +253,9 @@ function openModal(id) {
   playBtn.onclick = () => {
     if (item.type === "series") {
       const first = item.seasons[0] && item.seasons[0].episodes[0];
-      if (first) playVideo(first.src, `${item.title} — S${item.seasons[0].season}:E${first.episode} ${first.title}`);
+      if (first) playVideo(first.src, `${item.title} — S${item.seasons[0].season}:E${first.episode} ${first.title}`, epSubs(item, first));
     } else {
-      playVideo(item.src, item.title);
+      playVideo(item.src, item.title, item.subs);
     }
   };
 
@@ -282,12 +299,18 @@ function renderEpisodes(item) {
     const sel = wrap.querySelector(".season-select");
     if (sel) sel.onchange = (e) => drawSeason(+e.target.value);
 
-    wrap.querySelectorAll(".ep").forEach((row) => {
-      row.onclick = () => playVideo(row.dataset.src, row.dataset.title);
+    wrap.querySelectorAll(".ep").forEach((row, i) => {
+      const ep = season.episodes[i];
+      row.onclick = () => playVideo(ep.src, row.dataset.title, epSubs(item, ep));
     });
   };
 
   drawSeason(0);
+}
+
+/* Episode's own subs, falling back to series-level subs. */
+function epSubs(item, ep) {
+  return ep && ep.subs && ep.subs.length ? ep.subs : (item.subs || []);
 }
 
 function closeModal() {
@@ -296,7 +319,7 @@ function closeModal() {
 }
 
 /* ---------- Player ---------- */
-function playVideo(src, title) {
+function playVideo(src, title, subs) {
   const player = document.getElementById("player");
   const video = document.getElementById("video");
   document.getElementById("player-title").textContent = title || "";
@@ -305,9 +328,39 @@ function playVideo(src, title) {
     alert("No stream path is set for this title yet.\n\nAdd its file path in data/library.json to make it playable.");
     return;
   }
-  video.src = src;
+
+  // Reset any previous source + subtitle tracks
+  while (video.firstChild) video.removeChild(video.firstChild);
+  video.removeAttribute("src");
+  video.setAttribute("src", src);
+
+  // Add subtitle tracks (WebVTT sidecar files)
+  const list = Array.isArray(subs) ? subs.filter((s) => s && s.src) : [];
+  const hasDefault = list.some((s) => s.default);
+  list.forEach((s, i) => {
+    const t = document.createElement("track");
+    t.kind = "subtitles";
+    t.label = s.label || s.lang || `Subtitles ${i + 1}`;
+    if (s.lang) t.srclang = s.lang;
+    t.src = s.src;
+    if (s.default || (!hasDefault && i === 0)) t.default = true;
+    video.appendChild(t);
+  });
+
+  video.load();
   player.hidden = false;
   document.body.style.overflow = "hidden";
+  // Make sure the default track actually shows (some browsers ignore the attribute after load)
+  if (list.length) {
+    video.addEventListener("loadedmetadata", () => {
+      const tracks = video.textTracks;
+      let shown = false;
+      for (let i = 0; i < tracks.length; i++) {
+        if (list[i] && (list[i].default || (!hasDefault && i === 0))) { tracks[i].mode = "showing"; shown = true; }
+        else if (tracks[i].mode === "showing" && shown) tracks[i].mode = "disabled";
+      }
+    }, { once: true });
+  }
   video.play().catch(() => {/* autoplay may be blocked; controls are available */});
 }
 
@@ -315,6 +368,7 @@ function closePlayer() {
   const player = document.getElementById("player");
   const video = document.getElementById("video");
   video.pause();
+  while (video.firstChild) video.removeChild(video.firstChild);
   video.removeAttribute("src");
   video.load();
   player.hidden = true;
@@ -353,7 +407,14 @@ function wireChrome() {
     const play = e.target.closest("[data-play]");
     if (play) {
       const item = state.items.find((x) => x.id === play.dataset.play);
-      if (item) playVideo(item.src, item.title);
+      if (item) {
+        if (item.type === "series") {
+          const first = item.seasons[0] && item.seasons[0].episodes[0];
+          if (first) playVideo(first.src, item.title, epSubs(item, first));
+        } else {
+          playVideo(item.src, item.title, item.subs);
+        }
+      }
       return;
     }
     if (e.target.closest("[data-close]")) closeModal();

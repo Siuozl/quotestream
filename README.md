@@ -40,7 +40,11 @@ Everything lives in [`data/library.json`](data/library.json). Add an object to t
   "genre": ["Sci-Fi", "Drama"],
   "description": "A team travels through a wormhole in search of a new home for humanity.",
   "poster": "https://example.com/interstellar.jpg",
-  "src": "movies/interstellar.mp4"
+  "src": "movies/interstellar.mp4",
+  "subs": [
+    { "label": "English", "lang": "en", "src": "movies/interstellar.en.vtt", "default": true },
+    { "label": "Spanish", "lang": "es", "src": "movies/interstellar.es.vtt" }
+  ]
 }
 ```
 
@@ -81,7 +85,26 @@ Everything lives in [`data/library.json`](data/library.json). Add an object to t
 | `backdrop` | all | Optional wide image for the hero/detail banner. Falls back to `poster`. |
 | `featured` | all | `true` to make it eligible for the big hero banner. |
 | `src` | movie | Path or URL to the video file. |
+| `subs` | movie / episode | Optional subtitle list — see below. Also valid at series level as a fallback for episodes without their own. |
 | `seasons[].episodes[].src` | series | Path or URL to each episode's video file. |
+| `seasons[].episodes[].subs` | series | Optional per-episode subtitle list. |
+
+### Subtitles
+
+Browsers only render **WebVTT** (`.vtt`) subtitles loaded as sidecar files — they ignore subs embedded inside an MP4. Each `subs` entry is:
+
+```json
+{ "label": "English", "lang": "en", "src": "path/to/file.en.vtt", "default": true }
+```
+
+| Field | Notes |
+|-------|-------|
+| `label` | Name shown in the player's CC menu. |
+| `lang` | 2-letter language code (`srclang`). |
+| `src` | Path/URL to the `.vtt` file (same-origin recommended). |
+| `default` | `true` to show this track automatically. |
+
+Got MKVs with embedded subtitles? Use the companion **QuoteConvert** app — it remuxes to MP4 and extracts each subtitle track to `.vtt`, then hands you a ready-made entry (with `subs` filled in) to paste here.
 
 The `src` can be a full URL or a path relative to the site (e.g. `movies/interstellar.mp4`). Whatever the browser can play in a `<video>` tag (MP4/H.264 is safest) will stream.
 

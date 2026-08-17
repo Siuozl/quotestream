@@ -11,7 +11,10 @@
       "genre": ["Animation", "Comedy"],
       "featured": true,
       "description": "A big, good-natured rabbit is pushed too far by three bullying rodents and hatches a gentle, hilarious plan for payback. A Quote Library movie-night classic.",
-      "src": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+      "src": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+      "subs": [
+        { "label": "English (demo)", "lang": "en", "src": "data/subs/demo.en.vtt", "default": true }
+      ]
     },
     {
       "id": "sintel",
