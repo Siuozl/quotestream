@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuoteStream — The Quote Library Archive</title>
+  <meta name="description" content="QuoteStream is the streaming archive for every movie and series watched together on The Quote Library Discord." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23e50914'/%3E%3Ctext x='50' y='72' font-size='64' font-family='Arial' font-weight='bold' fill='white' text-anchor='middle'%3EQ%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <!-- ===== Top navigation ===== -->
+  <header class="topbar" id="topbar">
+    <div class="topbar__inner">
+      <a class="logo" href="#top" aria-label="QuoteStream home">
+        <span class="logo__mark">QUOTE</span><span class="logo__accent">STREAM</span>
+      </a>
+
+      <nav class="filters" aria-label="Content filters">
+        <button class="chip is-active" data-filter="all">All</button>
+        <button class="chip" data-filter="movie">Movies</button>
+        <button class="chip" data-filter="series">Series</button>
+      </nav>
+
+      <div class="topbar__right">
+        <div class="search">
+          <svg class="search__icon" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5 1.5-1.5-5-5Zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14Z"/></svg>
+          <input id="search" type="search" placeholder="Search titles, genres…" autocomplete="off" aria-label="Search the archive" />
+        </div>
+        <a class="discord-btn" href="https://discord.gg/aWwPNapb5x" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20"><path fill="currentColor" d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.24.5a18.3 18.3 0 0 1 4.32 1.35 16.7 16.7 0 0 0-14.98 0A18.3 18.3 0 0 1 8.84 3.5L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.9 8.63 0 12.75.3 16.8a19.9 19.9 0 0 0 6.06 3.1l.5-.86a13 13 0 0 1-1.94-.94l.24-.19a14.2 14.2 0 0 0 13.7 0l.24.19c-.6.36-1.25.68-1.94.94l.5.86a19.9 19.9 0 0 0 6.06-3.1c.36-4.72-.6-8.8-3.42-12.4ZM8.5 14.4c-.95 0-1.73-.9-1.73-2s.77-2 1.73-2 1.74.9 1.72 2c0 1.1-.77 2-1.72 2Zm7 0c-.95 0-1.73-.9-1.73-2s.77-2 1.73-2 1.74.9 1.72 2c0 1.1-.76 2-1.72 2Z"/></svg>
+          <span>Join Discord</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <a id="top"></a>
+
+  <!-- ===== Hero / featured banner ===== -->
+  <section class="hero" id="hero" aria-label="Featured title">
+    <div class="hero__backdrop" id="hero-backdrop"></div>
+    <div class="hero__fade"></div>
+    <div class="hero__content" id="hero-content">
+      <!-- filled by JS -->
+    </div>
+  </section>
+
+  <!-- ===== Content rows ===== -->
+  <main class="rows" id="rows">
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Scanning the archive…</p>
+    </div>
+  </main>
+
+  <!-- ===== Empty search state ===== -->
+  <div class="empty" id="empty" hidden>
+    <h2>No titles found</h2>
+    <p>Try a different search, or clear it to see the whole library.</p>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <div>
+        <span class="logo"><span class="logo__mark">QUOTE</span><span class="logo__accent">STREAM</span></span>
+        <p class="footer__tag">The streaming archive of The Quote Library.</p>
+      </div>
+      <a class="discord-btn discord-btn--ghost" href="https://discord.gg/aWwPNapb5x" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20"><path fill="currentColor" d="M20.3 4.4A19.8 19.8 0 0 0 15.4 3l-.24.5a18.3 18.3 0 0 1 4.32 1.35 16.7 16.7 0 0 0-14.98 0A18.3 18.3 0 0 1 8.84 3.5L8.6 3a19.8 19.8 0 0 0-4.9 1.4C.9 8.63 0 12.75.3 16.8a19.9 19.9 0 0 0 6.06 3.1l.5-.86a13 13 0 0 1-1.94-.94l.24-.19a14.2 14.2 0 0 0 13.7 0l.24.19c-.6.36-1.25.68-1.94.94l.5.86a19.9 19.9 0 0 0 6.06-3.1c.36-4.72-.6-8.8-3.42-12.4ZM8.5 14.4c-.95 0-1.73-.9-1.73-2s.77-2 1.73-2 1.74.9 1.72 2c0 1.1-.77 2-1.72 2Zm7 0c-.95 0-1.73-.9-1.73-2s.77-2 1.73-2 1.74.9 1.72 2c0 1.1-.76 2-1.72 2Z"/></svg>
+        <span>Join The Quote Library</span>
+      </a>
+    </div>
+    <p class="footer__fine">QuoteStream is a fan-run archive. All titles link to the community's own hosted copies.</p>
+  </footer>
+
+  <!-- ===== Detail modal ===== -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal__overlay" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button class="modal__close" data-close aria-label="Close">&times;</button>
+      <div class="modal__hero" id="modal-hero">
+        <div class="modal__hero-fade"></div>
+        <button class="btn btn--play modal__play" id="modal-play">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M8 5v14l11-7z"/></svg>
+          Play
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="modal__meta" id="modal-meta"></div>
+        <h2 class="modal__title" id="modal-title"></h2>
+        <p class="modal__desc" id="modal-desc"></p>
+        <div class="modal__tags" id="modal-tags"></div>
+        <div class="episodes" id="episodes"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Video player ===== -->
+  <div class="player" id="player" hidden>
+    <button class="player__close" id="player-close" aria-label="Close player">&times;</button>
+    <div class="player__title" id="player-title"></div>
+    <video id="video" controls playsinline></video>
+  </div>
+
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
